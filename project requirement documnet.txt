@@ -1,0 +1,55 @@
+NYC TLC Trip Analytics Platform - One Page Project Overview
+
+Objective:
+
+Build an end-to-end analytics solution using the last 5 years of NYC TLC Trip Record data (https://www.nyc.gov/site/tlc/about/tic-trip-record-data,page). The system will ingest and process Parquet files, store data in a SQL-based relational database, expose analytics through a Python API, and provide a minimal frontend with a time-series chart and a tabular view. The full application should be deployable to Azure.
+
+Data Scope:
+
+Use TLC Trip Record monthly Parquet datasets (Yellow, Green, FHV, High-Volume FHV) from the last 5 years.
+
+Include enrichment via TLC Taxi Zone Lookup.
+
+Compute derived metrics such as trip duration and total fare.
+
+Candidate defines the database schema (not provided).
+
+Core Requirements:
+
+Ingestion Pipeline: Download and process the last 5 years of Parquet files, validate, filter, and enrich data,
+
+SQL Database: Candidate must design their own schema for raw trips and daily
+
+aggregates.
+
+Daily Aggregation: Compute total trips, revenue, average trip distance, and average trip duration.
+
+Backend API: Endpoints for daily aggregates and table data, with pagination and
+
+authentication.
+
+Frontend: Minimal UI with a time-series chart and tabular view (Angular preferred).
+
+Azure Deployment: Deploy backend, frontend, and SQL database using Azure services with CI/CD.
+
+Deliverables:
+
+Git repository containing ingestion pipeline, API, frontend, SQL DDL, and CI/CD configuration.
+
+Documentation covering architecture, schema rationale, ingestion workflow, and deployment steps.
+
+Unit/integration tests for ingestion and API; optional E2E frontend tests.
+
+Evaluation Criteria:
+
+Data engineering robustness and ingestion design.
+
+Database modeling quality and query performance.
+
+API clarity, security, and performance.
+
+Frontend usability and responsiveness.
+
+Azure deployment completeness and CI/CD proficiency.
+
+Documentation clarity and overall engineering judgment.
