@@ -75,14 +75,12 @@ jobs:
 
     - name: Build backend Docker image
       run: |
-        cd backend
-        docker build -t nyc-backend:test .
+        docker build -t nyc-backend:test -f backend/Dockerfile .
       continue-on-error: true
 
     - name: Build frontend Docker image
       run: |
-        cd frontend
-        docker build -t nyc-frontend:test .
+        docker build -t nyc-frontend:test -f frontend/Dockerfile .
       continue-on-error: true
 
     - name: Validate Docker builds
