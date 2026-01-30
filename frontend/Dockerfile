@@ -11,7 +11,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 
-# Copy source code
+# Copy source code (all files from frontend directory)
 COPY . .
 
 # Build for production
@@ -23,8 +23,8 @@ FROM nginx:alpine
 # Copy built app from builder stage
 COPY --from=builder /app/dist/nyc-tlc-frontend /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx configuration if it exists
+COPY nginx.conf /etc/nginx/conf.d/default.conf 2>/dev/null || echo "Using default nginx config"
 
 # Expose port
 EXPOSE 80
