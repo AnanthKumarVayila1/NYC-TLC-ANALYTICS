@@ -606,7 +606,17 @@ export class DashboardComponent implements OnInit {
       return;
     }
     
-    const colors = ['#f1c40f', '#2ecc71', '#3498db', '#9b59b6'];
+    // Use same colors as the time series line chart for consistency
+    const colorMap: { [key: string]: string } = {
+      'yellow': '#f1c40f',
+      'green': '#2ecc71',
+      'fhv': '#3498db',
+      'fhvhv': '#9b59b6'
+    };
+    
+    const colors = this.summary!.by_service_type.map(s => 
+      colorMap[s.service_type.toLowerCase()] || '#95a5a6'
+    );
     
     this.pieChartData = {
       labels: this.summary!.by_service_type.map(s => s.service_type.toUpperCase()),

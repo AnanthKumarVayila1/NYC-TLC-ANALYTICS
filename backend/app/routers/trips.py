@@ -31,21 +31,20 @@ async def get_trips(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Get sample trip records (limited to 500 for performance).
+    Get trip records from fact_trip_sample table (sample data of 1 lakh records per service type).
     
-    Returns sample data to give a glimpse of individual trip details.
-    Limited to most recent 500 records to maintain performance.
+    Returns individual trip details with all available fields.
+    Supports filtering by date range, service type, and pickup borough.
     """
     
     try:
-        # Query agg_daily_metrics for sample trip data
-        # Build WHERE clause dynamically
+        # Query fact_trip_sample for individual trip records
         where_parts = []
         params = []
         
         if start_date and end_date:
-            where_parts.append("metric_date >= ?")
-            where_parts.append("metric_date <= ?")
+            where_parts.append("CAST(pickup_date AS DATE) >= ?")
+            where_parts.append("CAST(pickup_date AS DATE) <= ?")
             params.append(start_date)
             params.append(end_date)
         
@@ -53,10 +52,14 @@ async def get_trips(
             where_parts.append("service_type = ?")
             params.append(service_type.value)
         
+        if borough:
+            where_parts.append("pickup_borough = ?")
+            params.append(borough)
+        
         where_clause = " AND ".join(where_parts) if where_parts else "1=1"
         
         # Get total count
-        count_query = f"SELECT COUNT(*) as total FROM agg_daily_metrics WHERE {where_clause}"
+        count_query = f"SELECT COUNT(*) as total FROM fact_trip_sample WHERE {where_clause}"
         count_result = db.execute_scalar(count_query, tuple(params) if params else None)
         total_records = count_result if count_result else 0
         
@@ -64,38 +67,51 @@ async def get_trips(
         offset = (page - 1) * page_size
         query = f"""
             SELECT 
-                metric_date,
+                trip_id,
                 service_type,
-                total_trips,
-                total_revenue,
-                avg_trip_distance,
-                avg_trip_duration_sec
-            FROM agg_daily_metrics 
+                pickup_datetime,
+                dropoff_datetime,
+                pickup_location_id,
+                dropoff_location_id,
+                pickup_borough,
+                pickup_zone,
+                dropoff_borough,
+                dropoff_zone,
+                trip_distance,
+                total_amount,
+                trip_duration_sec,
+                pickup_date,
+                is_valid,
+                created_at
+            FROM fact_trip_sample 
             WHERE {where_clause}
-            ORDER BY metric_date DESC, service_type
+            ORDER BY pickup_datetime DESC
+            OFFSET ? ROWS
+            FETCH NEXT ? ROWS ONLY
         """
+        
+        # Add pagination params
+        params.append(offset)
+        params.append(page_size)
         
         result = db.execute_query(query, tuple(params) if params else None)
         
-        # Apply pagination in Python
-        paginated_result = result[offset:offset + page_size]
-        
         # Convert to Trip objects
         trips_data = []
-        for i, row in enumerate(paginated_result, start=1):
+        for row in result:
             try:
                 trip = Trip(
-                    trip_id=i,
+                    trip_id=row['trip_id'],
                     service_type=row['service_type'],
-                    pickup_datetime=row['metric_date'],
-                    dropoff_datetime=row['metric_date'],
-                    pickup_borough=None,
-                    pickup_zone=None,
-                    dropoff_borough=None,
-                    dropoff_zone=None,
-                    trip_distance=float(row.get('avg_trip_distance', 0)) if row.get('avg_trip_distance') else 0.0,
-                    total_amount=float(row.get('total_revenue', 0)) if row.get('total_revenue') else 0.0,
-                    trip_duration_sec=int(row.get('avg_trip_duration_sec', 0)) if row.get('avg_trip_duration_sec') else 0
+                    pickup_datetime=row['pickup_datetime'],
+                    dropoff_datetime=row['dropoff_datetime'],
+                    pickup_borough=row.get('pickup_borough'),
+                    pickup_zone=row.get('pickup_zone'),
+                    dropoff_borough=row.get('dropoff_borough'),
+                    dropoff_zone=row.get('dropoff_zone'),
+                    trip_distance=float(row.get('trip_distance', 0)) if row.get('trip_distance') else 0.0,
+                    total_amount=float(row.get('total_amount', 0)) if row.get('total_amount') else 0.0,
+                    trip_duration_sec=int(row.get('trip_duration_sec', 0)) if row.get('trip_duration_sec') else 0
                 )
                 trips_data.append(trip)
             except (KeyError, ValueError, TypeError) as e:
