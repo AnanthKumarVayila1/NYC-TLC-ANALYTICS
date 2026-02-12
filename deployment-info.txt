@@ -1,0 +1,44 @@
+NYC TLC Analytics - Azure Deployment Information
+================================================
+
+BACKEND APP SERVICE
+-------------------
+Name: nyc-tlc-backend-<YOUR-UNIQUE-ID>
+Runtime: Python 3.12
+OS: Linux
+Region: East US
+Plan: B1 Basic
+
+ENVIRONMENT VARIABLES TO SET:
+-------------------------------
+DB_SERVER=nyc-sqldb-server.database.windows.net
+DB_NAME=nyc-sqldatabase
+DB_USER=serveradmin
+DB_PASSWORD=<YOUR-DB-PASSWORD>
+DB_DRIVER=ODBC Driver 18 for SQL Server
+SECRET_KEY=Pm1nBhCYOmTSLGjum73yFrLO-cOjgLKIfSdLOFi-94s
+ALLOWED_ORIGINS=*
+
+(Update ALLOWED_ORIGINS later with your frontend URL)
+
+STARTUP COMMAND:
+----------------
+cd backend && pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+FRONTEND STATIC WEB APP
+-----------------------
+Name: nyc-tlc-frontend-<YOUR-UNIQUE-ID>
+Plan: Free
+Region: East US 2
+Source: Other
+
+DEPLOYMENT URLS (will be available after deployment):
+------------------------------------------------------
+Backend: https://nyc-tlc-backend-<YOUR-ID>.azurewebsites.net
+Frontend: https://nyc-tlc-frontend-<YOUR-ID>.azurestaticapps.net
+
+IMPORTANT FILES:
+----------------
+• Full Guide: AZURE_PORTAL_DEPLOYMENT.md
+• Quick Checklist: QUICK_DEPLOY.md
+• This file: deployment-info.txt
