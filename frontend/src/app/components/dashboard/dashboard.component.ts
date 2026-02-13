@@ -309,6 +309,18 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Initialize default dates (last 90 days) if not set
+    if (!this.startDate || !this.endDate) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 90);
+      
+      this.endDate = endDate.toISOString().split('T')[0];
+      this.startDate = startDate.toISOString().split('T')[0];
+      
+      console.log('Initialized default dates:', { startDate: this.startDate, endDate: this.endDate });
+    }
+    
     this.loadData();
   }
 

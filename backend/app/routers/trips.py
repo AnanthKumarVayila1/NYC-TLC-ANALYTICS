@@ -59,7 +59,7 @@ async def get_trips(
         where_clause = " AND ".join(where_parts) if where_parts else "1=1"
         
         # Get total count
-        count_query = f"SELECT COUNT(*) as total FROM fact_trip_sample WHERE {where_clause}"
+        count_query = f"SELECT COUNT(*) as total FROM fact_trip WHERE {where_clause}"
         count_result = db.execute_scalar(count_query, tuple(params) if params else None)
         total_records = count_result if count_result else 0
         
@@ -83,7 +83,7 @@ async def get_trips(
                 pickup_date,
                 is_valid,
                 created_at
-            FROM fact_trip_sample 
+            FROM fact_trip 
             WHERE {where_clause}
             ORDER BY pickup_datetime DESC
             OFFSET ? ROWS

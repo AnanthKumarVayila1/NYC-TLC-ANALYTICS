@@ -21,14 +21,15 @@ def find_env_file():
 
 class Settings(BaseSettings):
     # Database
-    DB_SERVER: str
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
+    DB_SERVER: str = "localhost"
+    DB_NAME: str = "NYC_TLC"
+    DB_USER: str = "sa"
+    DB_PASSWORD: str = "Password123"
     DB_DRIVER: str = "ODBC Driver 18 for SQL Server"
+    DEV_MODE: str = "false"  # Development mode flag
     
     # JWT
-    SECRET_KEY: str
+    SECRET_KEY: str = "dev-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     

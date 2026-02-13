@@ -27,6 +27,8 @@ async def get_summary_stats(
     Get summary statistics for the dashboard cards.
     Provides aggregated metrics across the selected date range.
     """
+    print(f"DEBUG SUMMARY ROUTER: start_date={start_date}, end_date={end_date}, service_type={service_type}")
+    
     # Validate date range
     if start_date > end_date:
         raise HTTPException(status_code=400, detail="start_date must be before end_date")
@@ -49,6 +51,9 @@ async def get_summary_stats(
     
     where_sql = " AND ".join(where_clauses)
     
+    print(f"DEBUG: where_sql = {where_sql}")
+    print(f"DEBUG: params = {params}")
+    
     # Get overall summary
     summary_query = f"""
         SELECT 
@@ -61,8 +66,15 @@ async def get_summary_stats(
         WHERE {where_sql}
     """
     
+    print(f"DEBUG: About to execute summary_query")
     summary_result = db.execute_query(summary_query, tuple(params))
+    print(f"DEBUG: summary_result = {summary_result}")
     summary = summary_result[0] if summary_result else {}
+    
+    print(f"DEBUG: summary dict keys = {summary.keys()}")
+    print(f"DEBUG: avg_distance from summary = {summary.get('avg_distance')}")
+    print(f"DEBUG: avg_duration_sec from summary = {summary.get('avg_duration_sec')}")
+    print(f"DEBUG: avg_fare from summary = {summary.get('avg_fare')}")
     
     # Get by service type
     service_query = f"""
@@ -81,12 +93,19 @@ async def get_summary_stats(
     # Skip borough query for performance - fact_trips table is too large (159.5M records)
     # This was causing timeouts
     
+    avg_dist = round(float(summary.get('avg_distance', 0) or 0), 2)
+    avg_dur_sec = float(summary.get('avg_duration_sec', 0) or 0)
+    avg_dur_min = round(avg_dur_sec / 60, 1)
+    avg_fa = round(float(summary.get('avg_fare', 0) or 0), 2)
+    
+    print(f"DEBUG: Calculated values: avg_dist={avg_dist}, avg_dur_min={avg_dur_min}, avg_fa={avg_fa}")
+    
     result = SummaryStats(
         total_trips=int(summary.get('total_trips', 0) or 0),
         total_revenue=float(summary.get('total_revenue', 0) or 0),
-        avg_distance=round(float(summary.get('avg_distance', 0) or 0), 2),
-        avg_duration_minutes=round(float(summary.get('avg_duration_sec', 0) or 0) / 60, 1),
-        avg_fare=round(float(summary.get('avg_fare', 0) or 0), 2),
+        avg_distance=avg_dist,
+        avg_duration_minutes=avg_dur_min,
+        avg_fare=avg_fa,
         by_service_type=[dict(row) for row in by_service],
         by_borough=[]  # Empty for performance
     )
